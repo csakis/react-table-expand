@@ -1,7 +1,7 @@
-import React, { HTMLAttributes, HTMLProps } from 'react'
-import ReactDOM from 'react-dom/client'
+import React, { HTMLAttributes, HTMLProps } from "react";
+import ReactDOM from "react-dom/client";
 
-import './index.css'
+import "./index.css";
 
 import {
   Column,
@@ -14,20 +14,20 @@ import {
   getExpandedRowModel,
   ColumnDef,
   flexRender,
-} from '@tanstack/react-table'
-import { makeData, Person } from './makeData'
+} from "@tanstack/react-table";
+import { makeData, Person } from "./makeData";
 
 function App() {
-  const rerender = React.useReducer(() => ({}), {})[1]
+  const rerender = React.useReducer(() => ({}), {})[1];
 
   const columns = React.useMemo<ColumnDef<Person>[]>(
     () => [
       {
-        header: 'Name',
-        footer: props => props.column.id,
+        header: "Name",
+        footer: (props) => props.column.id,
         columns: [
           {
-            accessorKey: 'firstName',
+            accessorKey: "firstName",
             header: ({ table }) => (
               <>
                 <IndeterminateCheckbox
@@ -36,14 +36,14 @@ function App() {
                     indeterminate: table.getIsSomeRowsSelected(),
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
-                />{' '}
+                />{" "}
                 <button
                   {...{
                     onClick: table.getToggleAllRowsExpandedHandler(),
                   }}
                 >
-                  {table.getIsAllRowsExpanded() ? '👇' : '👉'}
-                </button>{' '}
+                  {table.getIsAllRowsExpanded() ? "👇" : "👉"}
+                </button>{" "}
                 First Name
               </>
             ),
@@ -64,73 +64,69 @@ function App() {
                       indeterminate: row.getIsSomeSelected(),
                       onChange: row.getToggleSelectedHandler(),
                     }}
-                  />{' '}
-                  {row.getCanExpand() ? (
-                    <button
-                      {...{
-                        onClick: row.getToggleExpandedHandler(),
-                        style: { cursor: 'pointer' },
-                      }}
-                    >
-                      {row.getIsExpanded() ? '👇' : '👉'}
-                    </button>
-                  ) : (
-                    '🔵'
-                  )}{' '}
+                  />{" "}
+                  <button
+                    {...{
+                      onClick: () => row.toggleExpanded(!row.getIsExpanded()),
+                      style: { cursor: "pointer" },
+                    }}
+                  >
+                    {row.getIsExpanded() ? "👇" : "👉"}
+                  </button>{" "}
                   {getValue()}
                 </>
               </div>
             ),
-            footer: props => props.column.id,
+            footer: (props) => props.column.id,
           },
           {
-            accessorFn: row => row.lastName,
-            id: 'lastName',
-            cell: info => info.getValue(),
+            accessorFn: (row) => row.lastName,
+            id: "lastName",
+            cell: (info) => info.getValue(),
             header: () => <span>Last Name</span>,
-            footer: props => props.column.id,
+            footer: (props) => props.column.id,
           },
         ],
       },
       {
-        header: 'Info',
-        footer: props => props.column.id,
+        header: "Info",
+        footer: (props) => props.column.id,
         columns: [
           {
-            accessorKey: 'age',
-            header: () => 'Age',
-            footer: props => props.column.id,
+            accessorKey: "age",
+            header: () => "Age",
+            footer: (props) => props.column.id,
           },
           {
-            header: 'More Info',
+            header: "More Info",
             columns: [
               {
-                accessorKey: 'visits',
+                accessorKey: "visits",
                 header: () => <span>Visits</span>,
-                footer: props => props.column.id,
+                footer: (props) => props.column.id,
               },
               {
-                accessorKey: 'status',
-                header: 'Status',
-                footer: props => props.column.id,
+                accessorKey: "status",
+                header: "Status",
+                footer: (props) => props.column.id,
               },
               {
-                accessorKey: 'progress',
-                header: 'Profile Progress',
-                footer: props => props.column.id,
+                accessorKey: "progress",
+                header: "Profile Progress",
+                footer: (props) => props.column.id,
               },
             ],
           },
         ],
       },
     ],
-    []
-  )
+    [],
+  );
 
-  const [data, setData] = React.useState(() => makeData(100, 5, 3))
-  const refreshData = () => setData(() => makeData(100, 5, 3))
+  const [data, setData] = React.useState(() => makeData(100));
+  const refreshData = () => setData(() => makeData(100));
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>({})
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const table = useReactTable({
     data,
@@ -139,29 +135,28 @@ function App() {
       expanded,
     },
     onExpandedChange: setExpanded,
-    getSubRows: row => row.subRows,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     debugTable: true,
-  })
+  });
 
   return (
     <div className="p-2">
       <div className="h-2" />
       <table>
         <thead>
-          {table.getHeaderGroups().map(headerGroup => (
+          {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => {
+              {headerGroup.headers.map((header) => {
                 return (
                   <th key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <div>
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                         {header.column.getCanFilter() ? (
                           <div>
@@ -171,27 +166,40 @@ function App() {
                       </div>
                     )}
                   </th>
-                )
+                );
               })}
             </tr>
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map(row => {
+          {table.getRowModel().rows.map((row) => {
             return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => {
-                  return (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  )
-                })}
-              </tr>
-            )
+              <React.Fragment key={row.id}>
+                <tr key={row.id + "original"}>
+                  {row.getVisibleCells().map((cell) => {
+                    return (
+                      <td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {row.getIsExpanded() ? (
+                  <tr key={row.id + "expanded"}>
+                    <table>
+                      <tr>
+                        <td>
+                          <pre>{JSON.stringify(row.original, null, 2)}</pre>
+                        </td>
+                      </tr>
+                    </table>
+                  </tr>
+                ) : null}
+              </React.Fragment>
+            );
           })}
         </tbody>
       </table>
@@ -202,33 +210,33 @@ function App() {
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
-          {'<<'}
+          {"<<"}
         </button>
         <button
           className="border rounded p-1"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          {'<'}
+          {"<"}
         </button>
         <button
           className="border rounded p-1"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          {'>'}
+          {">"}
         </button>
         <button
           className="border rounded p-1"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
-          {'>>'}
+          {">>"}
         </button>
         <span className="flex items-center gap-1">
           <div>Page</div>
           <strong>
-            {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </strong>
         </span>
@@ -237,20 +245,20 @@ function App() {
           <input
             type="number"
             defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0
-              table.setPageIndex(page)
+            onChange={(e) => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0;
+              table.setPageIndex(page);
             }}
             className="border p-1 rounded w-16"
           />
         </span>
         <select
           value={table.getState().pagination.pageSize}
-          onChange={e => {
-            table.setPageSize(Number(e.target.value))
+          onChange={(e) => {
+            table.setPageSize(Number(e.target.value));
           }}
         >
-          {[10, 20, 30, 40, 50].map(pageSize => (
+          {[10, 20, 30, 40, 50].map((pageSize) => (
             <option key={pageSize} value={pageSize}>
               Show {pageSize}
             </option>
@@ -266,28 +274,28 @@ function App() {
       </div>
       <pre>{JSON.stringify(expanded, null, 2)}</pre>
     </div>
-  )
+  );
 }
 
 function Filter({
   column,
   table,
 }: {
-  column: Column<any, any>
-  table: Table<any>
+  column: Column<any, any>;
+  table: Table<any>;
 }) {
   const firstValue = table
     .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id)
+    .flatRows[0]?.getValue(column.id);
 
-  const columnFilterValue = column.getFilterValue()
+  const columnFilterValue = column.getFilterValue();
 
-  return typeof firstValue === 'number' ? (
+  return typeof firstValue === "number" ? (
     <div className="flex space-x-2">
       <input
         type="number"
-        value={(columnFilterValue as [number, number])?.[0] ?? ''}
-        onChange={e =>
+        value={(columnFilterValue as [number, number])?.[0] ?? ""}
+        onChange={(e) =>
           column.setFilterValue((old: [number, number]) => [
             e.target.value,
             old?.[1],
@@ -298,8 +306,8 @@ function Filter({
       />
       <input
         type="number"
-        value={(columnFilterValue as [number, number])?.[1] ?? ''}
-        onChange={e =>
+        value={(columnFilterValue as [number, number])?.[1] ?? ""}
+        onChange={(e) =>
           column.setFilterValue((old: [number, number]) => [
             old?.[0],
             e.target.value,
@@ -312,42 +320,42 @@ function Filter({
   ) : (
     <input
       type="text"
-      value={(columnFilterValue ?? '') as string}
-      onChange={e => column.setFilterValue(e.target.value)}
+      value={(columnFilterValue ?? "") as string}
+      onChange={(e) => column.setFilterValue(e.target.value)}
       placeholder={`Search...`}
       className="w-36 border shadow rounded"
     />
-  )
+  );
 }
 
 function IndeterminateCheckbox({
   indeterminate,
-  className = '',
+  className = "",
   ...rest
 }: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-  const ref = React.useRef<HTMLInputElement>(null!)
+  const ref = React.useRef<HTMLInputElement>(null!);
 
   React.useEffect(() => {
-    if (typeof indeterminate === 'boolean') {
-      ref.current.indeterminate = !rest.checked && indeterminate
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
     }
-  }, [ref, indeterminate])
+  }, [ref, indeterminate]);
 
   return (
     <input
       type="checkbox"
       ref={ref}
-      className={className + ' cursor-pointer'}
+      className={className + " cursor-pointer"}
       {...rest}
     />
-  )
+  );
 }
 
-const rootElement = document.getElementById('root')
-if (!rootElement) throw new Error('Failed to find the root element')
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
-)
+  </React.StrictMode>,
+);
