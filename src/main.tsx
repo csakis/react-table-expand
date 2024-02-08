@@ -1,8 +1,6 @@
 import React, { HTMLAttributes, HTMLProps } from "react";
 import ReactDOM from "react-dom/client";
 
-import "./index.css";
-
 import {
   Column,
   Table,
@@ -15,266 +13,138 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import { makeData, Person } from "./makeData";
+import MyTable from "./table";
+import InnerTable from "./inner";
 
 function App() {
-  const rerender = React.useReducer(() => ({}), {})[1];
+  type Person = {
+    id: number;
+    client: string;
+    payMethod: "Bancolombia" | "Efectivo" | "Nequi";
+    orderStatus: "Pendiente" | "Preparando" | "Enviado" | "Entregado";
+    paymentStatus: "Completo" | "Pendiente";
+    referral: string;
+    createdAt: Date;
+    subRows?: Item[];
+  };
 
-  const columns = React.useMemo<ColumnDef<Person>[]>(
+  type Item = {
+    product: "Higado" | "Manzana" | "Mani";
+    type: "Galleta" | "Premio";
+    weight: "25gr" | "50gr" | "500gr";
+    status: "Pendiente" | "Listo";
+  };
+
+  const columns = React.useMemo<ColumnDef<Person, any>[]>(
     () => [
       {
-        header: "Name",
-        footer: (props) => props.column.id,
-        columns: [
-          {
-            accessorKey: "firstName",
-            header: ({ table }) => (
-              <>
-                <IndeterminateCheckbox
-                  {...{
-                    checked: table.getIsAllRowsSelected(),
-                    indeterminate: table.getIsSomeRowsSelected(),
-                    onChange: table.getToggleAllRowsSelectedHandler(),
-                  }}
-                />{" "}
-                <button
-                  {...{
-                    onClick: table.getToggleAllRowsExpandedHandler(),
-                  }}
-                >
-                  {table.getIsAllRowsExpanded() ? "👇" : "👉"}
-                </button>{" "}
-                First Name
-              </>
-            ),
-            cell: ({ row, getValue }) => (
-              <div
-                style={{
-                  // Since rows are flattened by default,
-                  // we can use the row.depth property
-                  // and paddingLeft to visually indicate the depth
-                  // of the row
-                  paddingLeft: `${row.depth * 2}rem`,
+        accessorKey: "id",
+        id: "id",
+        cell: ({ row, getValue }) => (
+          <div
+            style={{
+              paddingLeft: `${row.depth * 2}rem`,
+            }}
+          >
+            <>
+              <button
+                {...{
+                  onClick: () => row.toggleExpanded(!row.getIsExpanded()),
+                  style: { cursor: "pointer" },
                 }}
               >
-                <>
-                  <IndeterminateCheckbox
-                    {...{
-                      checked: row.getIsSelected(),
-                      indeterminate: row.getIsSomeSelected(),
-                      onChange: row.getToggleSelectedHandler(),
-                    }}
-                  />{" "}
-                  <button
-                    {...{
-                      onClick: () => row.toggleExpanded(!row.getIsExpanded()),
-                      style: { cursor: "pointer" },
-                    }}
-                  >
-                    {row.getIsExpanded() ? "👇" : "👉"}
-                  </button>{" "}
-                  {getValue()}
-                </>
-              </div>
-            ),
-            footer: (props) => props.column.id,
-          },
-          {
-            accessorFn: (row) => row.lastName,
-            id: "lastName",
-            cell: (info) => info.getValue(),
-            header: () => <span>Last Name</span>,
-            footer: (props) => props.column.id,
-          },
-        ],
+                {row.getIsExpanded() ? "-" : "+"}
+              </button>
+
+              {getValue()}
+            </>
+          </div>
+        ),
+        header: () => <span>Id</span>,
+        size: 50,
       },
       {
-        header: "Info",
-        footer: (props) => props.column.id,
-        columns: [
-          {
-            accessorKey: "age",
-            header: () => "Age",
-            footer: (props) => props.column.id,
-          },
-          {
-            header: "More Info",
-            columns: [
-              {
-                accessorKey: "visits",
-                header: () => <span>Visits</span>,
-                footer: (props) => props.column.id,
-              },
-              {
-                accessorKey: "status",
-                header: "Status",
-                footer: (props) => props.column.id,
-              },
-              {
-                accessorKey: "progress",
-                header: "Profile Progress",
-                footer: (props) => props.column.id,
-              },
-            ],
-          },
-        ],
+        accessorKey: "client",
+        id: "client",
+        cell: (info) => info.getValue(),
+        header: () => <span>Cliente</span>,
+      },
+      {
+        accessorKey: "payMethod",
+        id: "payMethod",
+        cell: (info) => info.getValue(),
+        header: () => <span>Metodo de pago</span>,
+      },
+      {
+        accessorKey: "orderStatus",
+        id: "orderStatus",
+        cell: (info) => info.getValue(),
+        header: () => <span>Estado del pedido</span>,
+        size: 130,
+      },
+      {
+        accessorKey: "paymentStatus",
+        id: "paymentStatus",
+        cell: (info) => info.getValue(),
+        header: () => <span>Estado del pago</span>,
+        size: 120,
+      },
+      {
+        accessorKey: "referral",
+        id: "referral",
+        cell: (info) => info.getValue(),
+        header: () => <span>Referido</span>,
+      },
+      {
+        accessorKey: "createdAt",
+        id: "createdAt",
+        cell: (info) => info.getValue().toLocaleString(),
+        header: () => <span>Fecha de creacion</span>,
       },
     ],
     [],
   );
 
-  const [data, setData] = React.useState(() => makeData(100));
-  const refreshData = () => setData(() => makeData(100));
-
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      expanded,
+  const data: Person[] = [
+    {
+      id: 1,
+      client: "Juan Solano",
+      payMethod: "Bancolombia",
+      orderStatus: "Pendiente",
+      paymentStatus: "Pendiente",
+      referral: "El mejor can",
+      createdAt: new Date(),
+      subRows: [
+        {
+          product: "Higado",
+          type: "Galleta",
+          weight: "25gr",
+          status: "Pendiente",
+        },
+      ],
     },
-    onExpandedChange: setExpanded,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    debugTable: true,
-  });
-
-  return (
-    <div className="p-2">
-      <div className="h-2" />
-      <table>
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <th key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder ? null : (
-                      <div>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {header.column.getCanFilter() ? (
-                          <div>
-                            <Filter column={header.column} table={table} />
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
-            return (
-              <React.Fragment key={row.id}>
-                <tr key={row.id + "original"}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-                {row.getIsExpanded() ? (
-                  <tr key={row.id + "expanded"}>
-                    <table>
-                      <tr>
-                        <td>
-                          <pre>{JSON.stringify(row.original, null, 2)}</pre>
-                        </td>
-                      </tr>
-                    </table>
-                  </tr>
-                ) : null}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="h-2" />
-      <div className="flex items-center gap-2">
-        <button
-          className="border rounded p-1"
-          onClick={() => table.setPageIndex(0)}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<<"}
-        </button>
-        <button
-          className="border rounded p-1"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </button>
-        <button
-          className="border rounded p-1"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </button>
-        <button
-          className="border rounded p-1"
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          disabled={!table.getCanNextPage()}
-        >
-          {">>"}
-        </button>
-        <span className="flex items-center gap-1">
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </strong>
-        </span>
-        <span className="flex items-center gap-1">
-          | Go to page:
-          <input
-            type="number"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-            className="border p-1 rounded w-16"
-          />
-        </span>
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
-          }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>{table.getRowModel().rows.length} Rows</div>
-      <div>
-        <button onClick={() => rerender()}>Force Rerender</button>
-      </div>
-      <div>
-        <button onClick={() => refreshData()}>Refresh Data</button>
-      </div>
-      <pre>{JSON.stringify(expanded, null, 2)}</pre>
-    </div>
-  );
+    {
+      id: 2,
+      client: "Juan Solano",
+      payMethod: "Bancolombia",
+      orderStatus: "Pendiente",
+      paymentStatus: "Pendiente",
+      referral: "El mejor can",
+      createdAt: new Date(),
+      subRows: [],
+    },
+    {
+      id: 3,
+      client: "Juan Solano",
+      payMethod: "Bancolombia",
+      orderStatus: "Pendiente",
+      paymentStatus: "Pendiente",
+      referral: "El mejor can",
+      createdAt: new Date(),
+      subRows: [],
+    },
+  ];
+  return <InnerTable innerColumns={columns} innerData={data} />;
 }
 
 function Filter({
